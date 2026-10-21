@@ -90,3 +90,12 @@ class AppTextStyles {
   );
 }
 
+class AppShadow {
+  static BoxShadow shadow1 = BoxShadow(
+    color: AppColors.textDark.withValues(alpha: 0.15),
+    blurRadius: 2,
+    spreadRadius: 1,
+    offset: Offset(0, 0)
+  );
+}
+

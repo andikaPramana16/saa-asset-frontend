@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:saa_asset_management_frontend/core/theme.dart';
+import 'package:saa_asset_management_frontend/screens/daftar_lahan_view.dart';
+import 'package:saa_asset_management_frontend/screens/daftar_tim_lapangan_view.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -99,7 +101,13 @@ class _MainScreenState extends State<MainScreen> {
           ),
 
           Expanded(
-            child: Center(child: Text('Konten', style: AppTextStyles.heading2)),
+            child: Column(
+              children: [
+                _buildTopBar(),
+
+                Expanded(child: _buildMainContent(),)
+              ],
+            )
           ),
         ],
       ),
@@ -207,7 +215,7 @@ class _MainScreenState extends State<MainScreen> {
                 Text(
                   title,
                   style: AppTextStyles.body.copyWith(
-                    color: isActive ? AppColors.darkgreen : Colors.white,
+                    color: isActive ? AppColors.darkgreen : AppColors.white,
                     fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
@@ -216,7 +224,7 @@ class _MainScreenState extends State<MainScreen> {
                   isExpanded
                       ? Icons.keyboard_arrow_up
                       : Icons.keyboard_arrow_down,
-                  color: isActive ? AppColors.darkgreen : Colors.white,
+                  color: isActive ? AppColors.darkgreen : AppColors.white,
                 ),
               ],
             ),
@@ -260,11 +268,128 @@ class _MainScreenState extends State<MainScreen> {
         child: Text(
           title,
           style: AppTextStyles.body.copyWith(
-            color: isSubActive ? Colors.white : Colors.white70,
+            color: isSubActive ? AppColors.white : Colors.white70,
             fontWeight: isSubActive ? FontWeight.bold : FontWeight.normal,
           ),
         ),
       ),
     );
   }
+
+  Widget _buildTopBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+      color: AppColors.whiteGreen,
+      child: Row(
+        children: [
+
+          Container(
+            width: 400,
+            height: 48,
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(24), 
+              boxShadow: [AppShadow.shadow1]
+            ),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Search here',
+                hintStyle: AppTextStyles.body.copyWith(color: AppColors.darkgreen),
+                prefixIcon: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: SvgPicture.asset(
+                    'assets/icons/ic_search.svg',
+                    colorFilter: const ColorFilter.mode(
+                      AppColors.darkgreen,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                ),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+            ),
+          ),
+
+          const Spacer(),
+
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.white,
+              boxShadow: [AppShadow.shadow1]
+            ),
+            child: IconButton(
+              icon: SvgPicture.asset(
+                    'assets/icons/ic_notif.svg',
+                    colorFilter: const ColorFilter.mode(
+                      AppColors.darkgreen,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+              onPressed: () {
+                // Logic
+              },
+            ),
+          ),
+          
+          const SizedBox(width: 24), 
+          
+          Row(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [AppShadow.shadow1]
+              ),
+                child: CircleAvatar(
+                  radius: 20,
+                  backgroundColor: AppColors.white, 
+                  child: SvgPicture.asset(
+                      'assets/icons/ic_profileavatar.svg',
+                      colorFilter: const ColorFilter.mode(
+                        AppColors.darkgreen,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'John Doe', 
+                    style: AppTextStyles.bodyBold.copyWith(color: Colors.black87, fontSize: 14),
+                  ),
+                  Text(
+                    'Pemilik', 
+                    style: AppTextStyles.body.copyWith(color: Colors.grey, fontSize: 12),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMainContent() {
+    switch (_selectedIndex) {
+      case 0:
+        return Center(child: Text('Halaman Dasbor', style: AppTextStyles.heading2));
+      case 1:
+        return const DaftarLahanView(); 
+      case 2:
+        return const DaftarTimLapanganView();
+      case 3:
+        return Center(child: Text('Halaman Mitra Bisnis', style: AppTextStyles.heading2));
+      default:
+        return Center(child: Text('Halaman Belum Tersedia', style: AppTextStyles.heading2));
+    }
+  }
 }
+
+
