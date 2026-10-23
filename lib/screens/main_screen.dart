@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:saa_asset_management_frontend/core/theme.dart';
 import 'package:saa_asset_management_frontend/screens/daftar_lahan_view.dart';
 import 'package:saa_asset_management_frontend/screens/daftar_tim_lapangan_view.dart';
+import 'package:saa_asset_management_frontend/screens/detil_lahan_view.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -15,6 +16,7 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   int _selectedSubIndex = 0;
   final Set<String> _expandedMenus = {};
+  Map<String, dynamic>? _selectedLahanData;
 
   @override
   Widget build(BuildContext context) {
@@ -128,7 +130,7 @@ class _MainScreenState extends State<MainScreen> {
           setState(() {
             _selectedIndex = index;
             _expandedMenus.clear();
-            _selectedSubIndex = 0;
+            _selectedLahanData = null;
           });
         } else {}
       },
@@ -261,6 +263,7 @@ class _MainScreenState extends State<MainScreen> {
         setState(() {
           _selectedIndex = parentIndex;
           _selectedSubIndex = index;
+          _selectedLahanData = null;
         });
       },
       child: Padding(
@@ -381,7 +384,16 @@ class _MainScreenState extends State<MainScreen> {
       case 0:
         return Center(child: Text('Halaman Dasbor', style: AppTextStyles.heading2));
       case 1:
-        return const DaftarLahanView(); 
+        if (_selectedLahanData != null) {
+          return DetilLahanView(data: _selectedLahanData!);
+        } 
+        return DaftarLahanView(
+          onLahanTapped: (dataCardYangDiklik) {
+            setState(() {
+              _selectedLahanData = dataCardYangDiklik; 
+            });
+          },
+        );
       case 2:
         return const DaftarTimLapanganView();
       case 3:
