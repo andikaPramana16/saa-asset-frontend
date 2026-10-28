@@ -88,6 +88,12 @@ class AppTextStyles {
     fontWeight: FontWeight.normal,
     color: AppColors.textDark,
   );
+
+  static TextStyle subBodyBold = GoogleFonts.lato(
+    fontSize: 12,
+    fontWeight: FontWeight.bold,
+    color: AppColors.textDark,
+  );
 }
 
 class AppShadow {

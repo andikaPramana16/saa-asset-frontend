@@ -4,7 +4,7 @@ import 'package:saa_asset_management_frontend/core/theme.dart';
 import 'package:saa_asset_management_frontend/screens/daftar_lahan_view.dart';
 import 'package:saa_asset_management_frontend/screens/daftar_tim_lapangan_view.dart';
 import 'package:saa_asset_management_frontend/screens/detil_lahan_view.dart';
-
+import 'package:saa_asset_management_frontend/screens/mitra_bisnis_view.dart'; 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -397,7 +397,7 @@ class _MainScreenState extends State<MainScreen> {
       case 2:
         return const DaftarTimLapanganView();
       case 3:
-        return Center(child: Text('Halaman Mitra Bisnis', style: AppTextStyles.heading2));
+        return MitraBisnisView();
       default:
         return Center(child: Text('Halaman Belum Tersedia', style: AppTextStyles.heading2));
     }

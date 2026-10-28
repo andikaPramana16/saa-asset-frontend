@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:saa_asset_management_frontend/core/theme.dart';
@@ -11,14 +13,14 @@ class DetilLahanView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: AppColors.whiteGreen,
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.only(left: 32, right: 32, bottom: 32),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // KIRI: Gambar Lahan 
           Expanded(
             flex: 4,
-            child: _buildImageSection(),
+            child: _buildImageSection(context),
           ),
           
           const SizedBox(width: 24),
@@ -83,7 +85,7 @@ class DetilLahanView extends StatelessWidget {
     );
   }
 
-  Widget _buildImageSection() {
+  Widget _buildImageSection(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(24),
       child: Stack(
@@ -124,10 +126,13 @@ class DetilLahanView extends StatelessWidget {
           ),
           Positioned(
             bottom: 24, right: 24,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
-              child: Text('Informasi Investasi', style: AppTextStyles.bodyBold),
+            child: InkWell(
+              onTap: () => _showInvestasiModal(context, data),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
+                child: Text('Informasi Investasi', style: AppTextStyles.bodyBold),
+              ),
             ),
           ),
         ],
@@ -257,6 +262,90 @@ class DetilLahanView extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _showInvestasiModal(BuildContext context, Map<String, dynamic>? data) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.4), 
+      builder: (BuildContext context) {
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          child: Dialog(
+            backgroundColor: Colors.transparent, 
+            elevation: 0,
+            child: _buildInvestasiModalContent(context, data),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildInvestasiModalContent(BuildContext context, Map<String, dynamic>? data) {
+    final status = data?['investasi']?['status'] ?? 'Didanai';
+    final investor = data?['investasi']?['investor'] ?? 'PT. Agro Nusantara';
+    final nominal = data?['investasi']?['nominal'] ?? 'Rp. 1.500.000.000';
+    final dokumen = data?['investasi']?['dokumen'] ?? 'MoU_Lahan_Sumbermulyo.pdf';
+
+    return Container(
+      width: 450, 
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min, 
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Informasi Investasi', style: AppTextStyles.heading2Bold.copyWith(fontSize: 18, color: AppColors.darkgreen)),
+              InkWell(
+                onTap: () => Navigator.pop(context),
+                child: SvgPicture.asset(
+                  'assets/icons/ic_close.svg',
+                  width: 24,
+                  // Warna disesuaikan jadi abu-abu karena background sekarang putih
+                  colorFilter: ColorFilter.mode(Colors.grey.shade600, BlendMode.srcIn),
+                ),
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: 32),
+          
+          Table(
+            columnWidths: const {
+              0: FixedColumnWidth(170), 
+              1: FlexColumnWidth(),
+            },
+            children: [
+              _buildTableRow('Status Pendanaan', status),
+              _buildTableRow('Nama Investor', investor),
+              _buildTableRow('Nominal Investasi Masuk', nominal),
+              _buildTableRow('Dokumen Kontrak', dokumen),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+  TableRow _buildTableRow(String label, String value) {
+    return TableRow(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: Text(label, style: AppTextStyles.body.copyWith(color: Colors.grey.shade700, fontSize: 12)),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: Text(': $value', style: AppTextStyles.body.copyWith(color: Colors.grey.shade800, fontSize: 12)),
+        ),
+      ],
     );
   }
 }
