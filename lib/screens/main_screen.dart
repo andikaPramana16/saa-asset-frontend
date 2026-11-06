@@ -5,6 +5,13 @@ import 'package:saa_asset_management_frontend/screens/daftar_lahan_view.dart';
 import 'package:saa_asset_management_frontend/screens/daftar_tim_lapangan_view.dart';
 import 'package:saa_asset_management_frontend/screens/detil_lahan_view.dart';
 import 'package:saa_asset_management_frontend/screens/mitra_bisnis_view.dart'; 
+import 'package:saa_asset_management_frontend/screens/inventaris_lahan_view.dart';
+import 'package:saa_asset_management_frontend/screens/log_aktivitas_view.dart';
+import 'package:saa_asset_management_frontend/screens/laporan_aliran_logistik_view.dart';
+import 'package:saa_asset_management_frontend/screens/laporan_inventaris_view.dart';
+import 'package:saa_asset_management_frontend/screens/laporan_pemeliharaan_view.dart';
+import 'package:saa_asset_management_frontend/screens/laporan_kendala_view.dart';
+
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -17,6 +24,8 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedSubIndex = 0;
   final Set<String> _expandedMenus = {};
   Map<String, dynamic>? _selectedLahanData;
+  bool _isInventarisMode = false;
+  bool _isLogAktivitasMode = false;
 
   @override
   Widget build(BuildContext context) {
@@ -131,6 +140,8 @@ class _MainScreenState extends State<MainScreen> {
             _selectedIndex = index;
             _expandedMenus.clear();
             _selectedLahanData = null;
+            _isInventarisMode = false;
+            _isLogAktivitasMode = false;
           });
         } else {}
       },
@@ -185,12 +196,17 @@ class _MainScreenState extends State<MainScreen> {
         InkWell(
           onTap: () {
             setState(() {
+              if (_selectedIndex != index && subMenus.isNotEmpty) {
+                _selectedSubIndex = subMenus[0]['subIndex']; 
+              }
               _selectedIndex = index;
               if (isExpanded) {
                 _expandedMenus.remove(title);
               } else {
                 _expandedMenus.add(title);
               }
+              _isInventarisMode = false;
+              _isLogAktivitasMode = false;
             });
           },
           child: Container(
@@ -264,6 +280,8 @@ class _MainScreenState extends State<MainScreen> {
           _selectedIndex = parentIndex;
           _selectedSubIndex = index;
           _selectedLahanData = null;
+          _isInventarisMode = false;
+          _isLogAktivitasMode = false;
         });
       },
       child: Padding(
@@ -384,20 +402,50 @@ class _MainScreenState extends State<MainScreen> {
       case 0:
         return Center(child: Text('Halaman Dasbor', style: AppTextStyles.heading2));
       case 1:
-        if (_selectedLahanData != null) {
-          return DetilLahanView(data: _selectedLahanData!);
-        } 
-        return DaftarLahanView(
-          onLahanTapped: (dataCardYangDiklik) {
-            setState(() {
-              _selectedLahanData = dataCardYangDiklik; 
-            });
-          },
-        );
+        if (_isInventarisMode) {
+          return const InventarisLahanView(); 
+        } else if (_isLogAktivitasMode) { 
+          return const LogAktivitasView();
+        } else if (_selectedLahanData != null) {
+          return DetilLahanView(
+            data: _selectedLahanData!,
+            onInventarisTapped: () {
+              setState(() {
+                _isInventarisMode = true; 
+              });
+            },
+            onLogAktivitasTapped: () { 
+              setState(() {
+                _isLogAktivitasMode = true;
+              });
+            },
+          );
+        } else {
+          return DaftarLahanView(
+            onLahanTapped: (data) {
+              setState(() {
+                _selectedLahanData = data;
+              });
+            },
+          );
+        }
       case 2:
-        return const DaftarTimLapanganView();
+        return DaftarTimLapanganView();
       case 3:
         return MitraBisnisView();
+      case 4:
+        switch (_selectedSubIndex) {
+          case 1:
+            return const LaporanAliranLogistikView();
+          case 2: 
+            return const LaporanInventarisView();
+          case 3: 
+            return LaporanPemeliharaanView();
+          case 4: 
+            return const LaporanKendalaView();
+          default:
+            return Center(child: Text('Pilih Sub-Menu Laporan', style: AppTextStyles.heading2));
+        }
       default:
         return Center(child: Text('Halaman Belum Tersedia', style: AppTextStyles.heading2));
     }

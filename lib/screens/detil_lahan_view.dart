@@ -3,11 +3,14 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:saa_asset_management_frontend/core/theme.dart';
+import 'package:saa_asset_management_frontend/screens/inventaris_lahan_view.dart';
 
 class DetilLahanView extends StatelessWidget {
   final Map<String, dynamic>? data;
+  final VoidCallback? onInventarisTapped;
+  final VoidCallback? onLogAktivitasTapped;
 
-  const DetilLahanView({super.key, this.data});
+  const DetilLahanView({super.key, this.data, this.onInventarisTapped, this.onLogAktivitasTapped});
 
   @override
   Widget build(BuildContext context) {
@@ -66,11 +69,11 @@ class DetilLahanView extends StatelessWidget {
                 Expanded(
                   child: Column(
                     children: [
-                      Expanded(flex: 1, child: _buildActionCard('assets/icons/ic_inventory.svg', 'Inventaris Lahan')),
+                      Expanded(flex: 1, child: _buildActionCard('assets/icons/ic_inventory.svg', 'Inventaris Lahan', onTap: onInventarisTapped)),
                       const SizedBox(height: 16),
-                      Expanded(flex: 1, child: _buildActionCard('assets/icons/ic_progresstracking.svg', 'Progress Tracking')),
+                      Expanded(flex: 1, child: _buildActionCard('assets/icons/ic_progresstracking.svg', 'Progress Tracking', onTap: () => _showProgressModal(context, data),)),
                       const SizedBox(height: 16),
-                      Expanded(flex: 1, child: _buildActionCard('assets/icons/ic_logaktivitas.svg', 'Log aktivitas')),
+                      Expanded(flex: 1, child: _buildActionCard('assets/icons/ic_logaktivitas.svg', 'Log aktivitas', onTap: onLogAktivitasTapped)),
                       const SizedBox(height: 16),
                       // Melempar data PIC ke fungsi _buildPICCard
                       Expanded(flex: 7, child: _buildPICCard(data?['pic'] ?? 'Belum ada PIC')),
@@ -206,24 +209,28 @@ class DetilLahanView extends StatelessWidget {
     );
   }
 
-  Widget _buildActionCard(String iconPath, String title) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: Colors.white, borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Row(
-        children: [
-          SvgPicture.asset(
-              iconPath,
-              width: 25,
-              colorFilter: ColorFilter.mode(AppColors.darkgreen, BlendMode.srcIn),
-            ),
-          const SizedBox(width: 12),
-          Text(title, style: AppTextStyles.bodyBold),
-        ],
+  Widget _buildActionCard(String iconPath, String title, {VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap, // Menjalankan fungsi saat diklik
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.white, borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Row(
+          children: [
+            SvgPicture.asset(
+                iconPath,
+                width: 25,
+                colorFilter: ColorFilter.mode(AppColors.darkgreen, BlendMode.srcIn),
+              ),
+            const SizedBox(width: 12),
+            Text(title, style: AppTextStyles.bodyBold),
+          ],
+        ),
       ),
     );
   }
@@ -309,7 +316,6 @@ class DetilLahanView extends StatelessWidget {
                 child: SvgPicture.asset(
                   'assets/icons/ic_close.svg',
                   width: 24,
-                  // Warna disesuaikan jadi abu-abu karena background sekarang putih
                   colorFilter: ColorFilter.mode(Colors.grey.shade600, BlendMode.srcIn),
                 ),
               ),
@@ -334,6 +340,24 @@ class DetilLahanView extends StatelessWidget {
       ),
     );
   }
+
+  void _showProgressModal(BuildContext context, Map<String, dynamic>? data) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.4), 
+      builder: (BuildContext context) {
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          child: Dialog(
+            backgroundColor: Colors.transparent, 
+            elevation: 0,
+            child: ProgressTrackingModal(data: data),
+          ),
+        );
+      },
+    );
+  }
+
   TableRow _buildTableRow(String label, String value) {
     return TableRow(
       children: [
@@ -365,7 +389,6 @@ class _KomoditasCardState extends State<_KomoditasCard> {
 
   @override
   Widget build(BuildContext context) {
-    // Jika data null atau kosong, berikan nilai default agar tidak error
     final List<dynamic> activeList = (widget.komoditasData != null && widget.komoditasData!.isNotEmpty) 
         ? widget.komoditasData! 
         : [{'name': 'Data Kosong', 'percentage': '0%'}];
@@ -433,6 +456,176 @@ class _KomoditasCardState extends State<_KomoditasCard> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class ProgressTrackingModal extends StatefulWidget {
+  final Map<String, dynamic>? data;
+  const ProgressTrackingModal({super.key, this.data});
+
+  @override
+  State<ProgressTrackingModal> createState() => _ProgressTrackingModalState();
+}
+
+class _ProgressTrackingModalState extends State<ProgressTrackingModal> {
+  int _selectedBlokIndex = 0;
+  List<String> _blokList = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _blokList = widget.data?['daftar_blok'] ?? ['Blok A', 'Blok B'];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 450, 
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min, 
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Progress Tracking - Sektor Barat Malang', style: AppTextStyles.heading3Bold.copyWith(fontSize: 16)),
+              InkWell(
+                onTap: () => Navigator.pop(context),
+                child: Icon(Icons.close_rounded, color: Colors.grey.shade600, size: 20),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade400),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: List.generate(_blokList.length, (index) {
+                  final isActive = _selectedBlokIndex == index;
+                  return InkWell(
+                    onTap: () => setState(() => _selectedBlokIndex = index),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isActive ? AppColors.darkgreen : Colors.transparent,
+                        borderRadius: BorderRadius.horizontal(
+                          left: index == 0 ? const Radius.circular(3) : Radius.zero,
+                          right: index == _blokList.length - 1 ? const Radius.circular(3) : Radius.zero,
+                        ),
+                        border: index != _blokList.length - 1
+                            ? Border(right: BorderSide(color: Colors.grey.shade400))
+                            : null,
+                      ),
+                      child: Text(
+                        _blokList[index],
+                        style: TextStyle(
+                          color: isActive ? Colors.white : Colors.grey.shade600,
+                          fontSize: 13,
+                          fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          
+          Text('Periode', style: AppTextStyles.bodyBold.copyWith(fontSize: 14)),
+          const SizedBox(height: 8),
+          Container(
+            width: 220,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: Colors.grey.shade400),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('12 Okt 2026 - Sekarang (Aktif)', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                Icon(Icons.keyboard_arrow_down, color: Colors.grey.shade600, size: 16),
+              ],
+            ),
+          ),
+          const SizedBox(height: 48),
+
+          _buildTimelineBar(),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimelineBar() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _buildTimelineStep('Persiapan', true, isFirst: true),
+        _buildTimelineConnector(true),
+        _buildTimelineStep('Tanam', true),
+        _buildTimelineConnector(true),
+        _buildTimelineStep('Perawatan', true, isActive: true), 
+        _buildTimelineConnector(false),
+        _buildTimelineStep('Panen', false, isLast: true),
+      ],
+    );
+  }
+
+  Widget _buildTimelineStep(String label, bool isCompleted, {bool isActive = false, bool isFirst = false, bool isLast = false}) {
+    Color dotColor = Colors.grey.shade400; 
+    if (isActive) dotColor = const Color(0xFFC0CA33); 
+    else if (isCompleted) dotColor = AppColors.darkgreen; 
+
+    return Column(
+      children: [
+        Container(
+          width: 14, height: 14,
+          decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
+        ),
+        const SizedBox(height: 8),
+        Text(label, style: AppTextStyles.body.copyWith(fontSize: 13, color: isCompleted || isActive ? AppColors.darkgreen : Colors.grey.shade700)),
+      ],
+    );
+  }
+
+  Widget _buildTimelineConnector(bool isSolid) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 24.0, left: 8, right: 8),
+        child: Container(
+          height: 1,
+          color: isSolid ? AppColors.darkgreen : Colors.transparent,
+          child: !isSolid ? LayoutBuilder(
+            builder: (context, constraints) {
+              return Flex(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                direction: Axis.horizontal,
+                children: List.generate(
+                  (constraints.constrainWidth() / 4).floor(),
+                  (_) => const SizedBox(width: 2, height: 1, child: DecoratedBox(decoration: BoxDecoration(color: Colors.grey))),
+                ),
+              );
+            },
+          ) : null,
+        ),
       ),
     );
   }

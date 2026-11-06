@@ -233,7 +233,6 @@ class MitraBisnisView extends StatelessWidget {
       ),
     );
   }
-
 }
 
 
@@ -293,7 +292,7 @@ class _ExpandableMitraRowState extends State<ExpandableMitraRow> {
 
           if (_isExpanded && detailLahan.isNotEmpty)
             Container(
-              margin: const EdgeInsets.only(left: 24, right: 24, bottom: 24, top: 8),
+              margin: const EdgeInsets.only(left: 24, right: 24, bottom: 24, top: 8   ),
               padding: const EdgeInsets.only(left: 12, right: 12, top: 12),
               decoration: BoxDecoration(
                 color: const Color(0xFFFFFFFF), 
@@ -306,10 +305,10 @@ class _ExpandableMitraRowState extends State<ExpandableMitraRow> {
                 children: [
                   Row(
                     children: [
-                      Expanded(flex: 2, child: Text('Nama Lahan')),
-                      Expanded(flex: 2, child: Text('Nominal Investasi')),
-                      Expanded(flex: 2, child: Text('Status Kontrak')),
-                      Expanded(flex: 2, child: Text('Dokumen MoU')),
+                      Expanded(flex: 2, child: Text('Nama Lahan', style: AppTextStyles.bodyBold.copyWith(fontSize: 14))),
+                      Expanded(flex: 2, child: Text('Nominal Investasi', style: AppTextStyles.bodyBold.copyWith(fontSize: 14))),
+                      Expanded(flex: 2, child: Text('Status Kontrak', style: AppTextStyles.bodyBold.copyWith(fontSize: 14))),
+                      Expanded(flex: 2, child: Text('Dokumen MoU', style: AppTextStyles.bodyBold.copyWith(fontSize: 14))),
                     ],
                   ),
                   const Padding(
@@ -322,10 +321,10 @@ class _ExpandableMitraRowState extends State<ExpandableMitraRow> {
                       padding: const EdgeInsets.only(bottom: 16.0),
                       child: Row(
                         children: [
-                          Expanded(flex: 2, child: Text(detail['nama_lahan'])),
-                          Expanded(flex: 2, child: Text(detail['nominal_investasi'])),
-                          Expanded(flex: 2, child: Text(detail['status_kontrak'])),
-                          Expanded(flex: 2, child: Text(detail['dokumen_mou'])),
+                          Expanded(flex: 2, child: Text(detail['nama_lahan'], style: AppTextStyles.body.copyWith(fontSize: 14))),
+                          Expanded(flex: 2, child: Text(detail['nominal_investasi'], style: AppTextStyles.body.copyWith(fontSize: 14))),
+                          Expanded(flex: 2, child: Text(detail['status_kontrak'], style: AppTextStyles.body.copyWith(fontSize: 14))),
+                          Expanded(flex: 2, child: Text(detail['dokumen_mou'], style: AppTextStyles.body.copyWith(fontSize: 14))),
                         ],
                       ),
                     );
