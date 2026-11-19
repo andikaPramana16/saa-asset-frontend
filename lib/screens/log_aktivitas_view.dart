@@ -77,6 +77,8 @@ class LogAktivitasView extends StatelessWidget {
               _buildDropdownFilter('Blok Lahan'),
               const SizedBox(width: 16),
               _buildDateFilter(),
+              const SizedBox(width: 16),
+              
             ],
           ),
           const SizedBox(height: 24),

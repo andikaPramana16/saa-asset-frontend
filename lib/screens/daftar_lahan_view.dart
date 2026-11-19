@@ -1,136 +1,95 @@
 import 'package:flutter/material.dart';
 import 'package:saa_asset_management_frontend/core/theme.dart';
 
-class DaftarLahanView extends StatelessWidget {
 
-  final Function(Map<String, dynamic>) onLahanTapped; 
+import 'package:saa_asset_management_frontend/models/lahan.dart';
+import 'package:saa_asset_management_frontend/services/lahan_service.dart';
+
+class DaftarLahanView extends StatefulWidget {
+  final Function(Lahan) onLahanTapped;
 
   const DaftarLahanView({super.key, required this.onLahanTapped});
 
-  final List<Map<String, dynamic>> dummyLahan = const [
-    {
-      'name': 'Lahan Sumbermulyo',
-      'location': 'Malang',
-      'pic': 'Yanto',
-      'image': 'assets/images/lahan_dummy.png',
-      'commodities': [
-        {'name': 'Kentang', 'percentage': '25%'},
-        {'name': 'Padi', 'percentage': '25%'},
-        {'name': 'Jagung', 'percentage': '25%'},
-        {'name': 'Cabai', 'percentage': '25%'},
-      ],
-    },
-    {
-      'name': 'Lahan Sukamakmur',
-      'location': 'Malang',
-      'pic': 'Yanto',
-      'image': 'assets/images/lahan_dummy.png',
-      'commodities': [
-        {'name': 'Kentang', 'percentage': '25%'},
-        {'name': 'Padi', 'percentage': '25%'},
-        {'name': 'Jagung', 'percentage': '50%'},
-      ],
-    },
-    {
-      'name': 'Lahan Singosari',
-      'location': 'Malang',
-      'pic': 'Budi',
-      'image': 'assets/images/lahan_dummy.png',
-      'commodities': [
-        {'name': 'Tebu', 'percentage': '100%'},
-      ],
-    },
-    {
-      'name': 'Lahan Pujon',
-      'location': 'Batu',
-      'pic': 'Siti',
-      'image': 'assets/images/lahan_dummy.png',
-      'commodities': [
-        {'name': 'Wortel', 'percentage': '60%'},
-        {'name': 'Kubis', 'percentage': '40%'},
-      ],
-    },
-    {
-      'name': 'Lahan Sumbermulyo',
-      'location': 'Malang',
-      'pic': 'Yanto',
-      'image': 'assets/images/lahan_dummy.png',
-      'commodities': [
-        {'name': 'Kentang', 'percentage': '25%'},
-        {'name': 'Padi', 'percentage': '25%'},
-        {'name': 'Jagung', 'percentage': '50%'},
-      ],
-    },
-    {
-      'name': 'Lahan Sukamakmur',
-      'location': 'Malang',
-      'pic': 'Yanto',
-      'image': 'assets/images/lahan_dummy.png',
-      'commodities': [
-        {'name': 'Kentang', 'percentage': '25%'},
-        {'name': 'Padi', 'percentage': '25%'},
-        {'name': 'Jagung', 'percentage': '50%'},
-      ],
-    },
-    {
-      'name': 'Lahan Singosari',
-      'location': 'Malang',
-      'pic': 'Budi',
-      'image': 'assets/images/lahan_dummy.png',
-      'commodities': [
-        {'name': 'Tebu', 'percentage': '100%'},
-      ],
-    },
-    {
-      'name': 'Lahan Pujon',
-      'location': 'Batu',
-      'pic': 'Siti',
-      'image': 'assets/images/lahan_dummy.png',
-      'commodities': [
-        {'name': 'Wortel', 'percentage': '60%'},
-        {'name': 'Kubis', 'percentage': '40%'},
-      ],
-    },
-  ];
+  @override
+  State<DaftarLahanView> createState() => _DaftarLahanViewState();
+}
 
-  
+class _DaftarLahanViewState extends State<DaftarLahanView> {
+  late Future<List<Lahan>> _futureLahan;
+
+  @override
+  void initState() {
+    super.initState();
+    _futureLahan = LahanService.fetchDaftarLahan();
+  }
+
+  void _muatUlang() {
+    setState(() {
+      _futureLahan = LahanService.fetchDaftarLahan();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       color: AppColors.whiteGreen,
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.only(left: 32, right: 32, bottom: 32),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GridView.builder(
+      child: FutureBuilder<List<Lahan>>(
+        future: _futureLahan,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Gagal memuat data lahan', style: AppTextStyles.bodyBold),
+                  const SizedBox(height: 8),
+                  Text('${snapshot.error}', style: AppTextStyles.body.copyWith(fontSize: 12)),
+                  const SizedBox(height: 16),
+                  ElevatedButton(onPressed: _muatUlang, child: const Text('Coba lagi')),
+                ],
+              ),
+            );
+          }
+
+          final daftarLahan = snapshot.data ?? [];
+          if (daftarLahan.isEmpty) {
+            return Center(child: Text('Belum ada data lahan', style: AppTextStyles.body));
+          }
+
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 32, right: 32, bottom: 32),
+              child: GridView.builder(
                 shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: dummyLahan.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4, 
-                  crossAxisSpacing: 24, 
-                  mainAxisSpacing: 24, 
-                  childAspectRatio: 0.75, 
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: daftarLahan.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  crossAxisSpacing: 24,
+                  mainAxisSpacing: 24,
+                  childAspectRatio: 0.75,
                 ),
                 itemBuilder: (context, index) {
-                  final data = dummyLahan[index];
+                  final data = daftarLahan[index];
                   return InkWell(
-                    onTap: (){
-                      onLahanTapped(data);
-                  },child: _buildLahanCard(data));
+                    onTap: () => widget.onLahanTapped(data),
+                    child: _buildLahanCard(data),
+                  );
                 },
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildLahanCard(Map<String, dynamic> data) {
+
+  Widget _buildLahanCard(Lahan lahan) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
@@ -141,7 +100,7 @@ class DaftarLahanView extends StatelessWidget {
       child: Stack(
         children: [
           ClipRRect(borderRadius: BorderRadiusGeometry.circular(16),
-            child: Image.asset(data['image'],fit: BoxFit.cover)),
+            child: Image.asset(lahan.gambar,fit: BoxFit.cover)),
         
           Positioned(
             bottom: 0, 
@@ -158,14 +117,14 @@ class DaftarLahanView extends StatelessWidget {
                 children: [
                   // Nama Lahan & Lokasi
                   Text(
-                    data['name'],
+                    lahan.namaLahan,
                     style: AppTextStyles.bodyBold.copyWith(fontSize: 14),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    data['location'],
+                    lahan.alamat,
                     style: AppTextStyles.body.copyWith(fontSize: 12, color: Colors.grey.shade700),
                   ),
                   
@@ -173,7 +132,7 @@ class DaftarLahanView extends StatelessWidget {
                   
                   // Penanggung Jawab
                   Text(
-                    'Penanggungjawab : ${data['pic']}',
+                    'Penanggungjawab : ${lahan.namaPenanggungJawab ?? 'Belum ada PIC'}',
                     style: AppTextStyles.body.copyWith(fontSize: 12),
                   ),
                   
@@ -183,7 +142,7 @@ class DaftarLahanView extends StatelessWidget {
                   Wrap(
                     spacing: 8.0, 
                     runSpacing: 8.0, 
-                    children: (data['commodities'] as List).map((komoditas) {
+                    children: lahan.komoditas.map((komoditas) {
                       return Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
@@ -194,12 +153,12 @@ class DaftarLahanView extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              komoditas['name'],
+                              komoditas.nama,
                               style: AppTextStyles.body.copyWith(fontSize: 10, color: AppColors.darkgreen),
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              komoditas['percentage'],
+                              komoditas.persentase,
                               style: AppTextStyles.bodyBold.copyWith(fontSize: 10, color: AppColors.darkgreen),
                             ),
                           ],

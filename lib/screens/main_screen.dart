@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:saa_asset_management_frontend/core/theme.dart';
+import 'package:saa_asset_management_frontend/models/lahan.dart';
 import 'package:saa_asset_management_frontend/screens/daftar_lahan_view.dart';
 import 'package:saa_asset_management_frontend/screens/daftar_tim_lapangan_view.dart';
 import 'package:saa_asset_management_frontend/screens/detil_lahan_view.dart';
@@ -23,7 +24,7 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   int _selectedSubIndex = 0;
   final Set<String> _expandedMenus = {};
-  Map<String, dynamic>? _selectedLahanData;
+  Lahan? _selectedLahan;
   bool _isInventarisMode = false;
   bool _isLogAktivitasMode = false;
 
@@ -139,7 +140,7 @@ class _MainScreenState extends State<MainScreen> {
           setState(() {
             _selectedIndex = index;
             _expandedMenus.clear();
-            _selectedLahanData = null;
+            _selectedLahan = null;
             _isInventarisMode = false;
             _isLogAktivitasMode = false;
           });
@@ -279,7 +280,7 @@ class _MainScreenState extends State<MainScreen> {
         setState(() {
           _selectedIndex = parentIndex;
           _selectedSubIndex = index;
-          _selectedLahanData = null;
+          _selectedLahan = null;
           _isInventarisMode = false;
           _isLogAktivitasMode = false;
         });
@@ -406,9 +407,9 @@ class _MainScreenState extends State<MainScreen> {
           return const InventarisLahanView(); 
         } else if (_isLogAktivitasMode) { 
           return const LogAktivitasView();
-        } else if (_selectedLahanData != null) {
+        } else if (_selectedLahan != null) {
           return DetilLahanView(
-            data: _selectedLahanData!,
+            lahan: _selectedLahan!,
             onInventarisTapped: () {
               setState(() {
                 _isInventarisMode = true; 
@@ -422,9 +423,9 @@ class _MainScreenState extends State<MainScreen> {
           );
         } else {
           return DaftarLahanView(
-            onLahanTapped: (data) {
+            onLahanTapped: (lahan) {
               setState(() {
-                _selectedLahanData = data;
+                _selectedLahan = lahan;
               });
             },
           );

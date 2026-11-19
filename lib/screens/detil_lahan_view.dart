@@ -3,14 +3,16 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:saa_asset_management_frontend/core/theme.dart';
+import 'package:saa_asset_management_frontend/models/kondisi_lingkungan.dart';
+import 'package:saa_asset_management_frontend/models/lahan.dart';
 import 'package:saa_asset_management_frontend/screens/inventaris_lahan_view.dart';
 
 class DetilLahanView extends StatelessWidget {
-  final Map<String, dynamic>? data;
+  final Lahan? lahan;
   final VoidCallback? onInventarisTapped;
   final VoidCallback? onLogAktivitasTapped;
 
-  const DetilLahanView({super.key, this.data, this.onInventarisTapped, this.onLogAktivitasTapped});
+  const DetilLahanView({super.key, this.lahan, this.onInventarisTapped, this.onLogAktivitasTapped});
 
   @override
   Widget build(BuildContext context) {
@@ -37,13 +39,13 @@ class DetilLahanView extends StatelessWidget {
                 Expanded(
                   child: Column(
                     children: [
-                      Expanded(flex: 2, child: _buildTextCard('Lokasi', 'Ds. Sumbermulyo, Kec. Jogoroto, Kab. Jombang, Jawa Timur 61485')),
+                      Expanded(flex: 2, child: _buildTextCard('Lokasi', lahan?.alamat ?? '-')),
                       const SizedBox(height: 16),
-                      Expanded(flex: 2, child: _buildTextCard('Koordinat', 'Latitude : -7.576134\nLongitude : 112.281455')),
+                      Expanded(flex: 2, child: _buildTextCard('Koordinat', lahan?.koordinatTampil ?? '-')),
                       const SizedBox(height: 16),
-                      Expanded(flex: 3, child: _buildStatCard('assets/icons/ic_kelembaban.svg', 'Kelembaban', '65', '%')),
+                      Expanded(flex: 3, child: _buildStatCard('assets/icons/ic_kelembaban.svg', 'Kelembaban', _angka(lahan?.kondisi?.kelembapanTanah), lahan?.kondisi == null ? '' : '%')),
                       const SizedBox(height: 16),
-                      Expanded(flex: 3, child: _buildStatCard('assets/icons/ic_ph.svg', 'pH Level', '6,7', '')),
+                      Expanded(flex: 3, child: _buildStatCard('assets/icons/ic_ph.svg', 'pH Level', _angka(lahan?.kondisi?.nilaiPh), '')),
                     ],
                   ),
                 ),
@@ -53,13 +55,13 @@ class DetilLahanView extends StatelessWidget {
                 Expanded(
                   child: Column(
                     children: [
-                      Expanded(flex: 2, child: _buildTextCard('Luas', '1.2 Hektar')),
+                      Expanded(flex: 2, child: _buildTextCard('Luas', lahan?.luasLahanTampil ?? '-')),
                       const SizedBox(height: 16),
-                      Expanded(flex: 2, child: _buildTextCard('Estimasi Nilai Lahan', 'Rp. 1.500.000.000', iconPath: 'assets/icons/ic_nilailahan.svg')),
+                      Expanded(flex: 2, child: _buildTextCard('Estimasi Nilai Lahan', lahan?.nilaiLahanTampil ?? '-', iconPath: 'assets/icons/ic_nilailahan.svg')),
                       const SizedBox(height: 16),
-                      Expanded(flex: 3, child: _buildStatCard('assets/icons/ic_suhu.svg', 'Temperatur', '19', '°C')),
+                      Expanded(flex: 3, child: _buildStatCard('assets/icons/ic_suhu.svg', 'Temperatur', _angka(lahan?.kondisi?.suhuTanah), lahan?.kondisi == null ? '' : '°C')),
                       const SizedBox(height: 16),
-                      Expanded(flex: 3, child: _KomoditasCard(komoditasData: data?['commodities'])),
+                      Expanded(flex: 3, child: _KomoditasCard(komoditasData: lahan?.komoditas)),
                     ],
                   ),
                 ),
@@ -71,12 +73,11 @@ class DetilLahanView extends StatelessWidget {
                     children: [
                       Expanded(flex: 1, child: _buildActionCard('assets/icons/ic_inventory.svg', 'Inventaris Lahan', onTap: onInventarisTapped)),
                       const SizedBox(height: 16),
-                      Expanded(flex: 1, child: _buildActionCard('assets/icons/ic_progresstracking.svg', 'Progress Tracking', onTap: () => _showProgressModal(context, data),)),
+                      Expanded(flex: 1, child: _buildActionCard('assets/icons/ic_progresstracking.svg', 'Progress Tracking', onTap: () => _showProgressModal(context),)),
                       const SizedBox(height: 16),
                       Expanded(flex: 1, child: _buildActionCard('assets/icons/ic_logaktivitas.svg', 'Log aktivitas', onTap: onLogAktivitasTapped)),
                       const SizedBox(height: 16),
-                      // Melempar data PIC ke fungsi _buildPICCard
-                      Expanded(flex: 7, child: _buildPICCard(data?['pic'] ?? 'Belum ada PIC')),
+                      Expanded(flex: 7, child: _buildPICCard(lahan?.namaPenanggungJawab ?? 'Belum ada PIC')),
                     ],
                   ),
                 ),
@@ -95,7 +96,7 @@ class DetilLahanView extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           Image.asset(
-            data?['image'] ?? 'assets/images/lahan_dummy.png', 
+            lahan?.gambar ?? 'assets/images/lahan_dummy.png', 
             fit: BoxFit.fitWidth,
           ),
           Positioned(
@@ -122,15 +123,15 @@ class DetilLahanView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(data?['name'] ?? 'Nama Lahan', style: AppTextStyles.heading3Bold.copyWith(color: Colors.white)),
-                Text(data?['location'] ?? 'Lokasi', style: AppTextStyles.heading3.copyWith(color: Colors.white70)),
+                Text(lahan?.namaLahan ?? 'Nama Lahan', style: AppTextStyles.heading3Bold.copyWith(color: Colors.white)),
+                Text(lahan?.alamat ?? 'Lokasi', style: AppTextStyles.heading3.copyWith(color: Colors.white70)),
               ],
             ),
           ),
           Positioned(
             bottom: 24, right: 24,
             child: InkWell(
-              onTap: () => _showInvestasiModal(context, data),
+              onTap: () => _showInvestasiModal(context),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
@@ -176,6 +177,9 @@ class DetilLahanView extends StatelessWidget {
       ),
     );
   }
+
+  /// Angka kondisi lingkungan, atau "-" kalau lahan belum punya data.
+  String _angka(double? nilai) => nilai == null ? '-' : KondisiLingkungan.formatAngka(nilai);
 
   Widget _buildStatCard(String iconPath, String title, String value, String unit) {
     return Container(
@@ -272,7 +276,7 @@ class DetilLahanView extends StatelessWidget {
     );
   }
 
-  void _showInvestasiModal(BuildContext context, Map<String, dynamic>? data) {
+  void _showInvestasiModal(BuildContext context) {
     showDialog(
       context: context,
       barrierColor: Colors.black.withOpacity(0.4), 
@@ -282,18 +286,18 @@ class DetilLahanView extends StatelessWidget {
           child: Dialog(
             backgroundColor: Colors.transparent, 
             elevation: 0,
-            child: _buildInvestasiModalContent(context, data),
+            child: _buildInvestasiModalContent(context),
           ),
         );
       },
     );
   }
 
-  Widget _buildInvestasiModalContent(BuildContext context, Map<String, dynamic>? data) {
-    final status = data?['investasi']?['status'] ?? 'Didanai';
-    final investor = data?['investasi']?['investor'] ?? 'PT. Agro Nusantara';
-    final nominal = data?['investasi']?['nominal'] ?? 'Rp. 1.500.000.000';
-    final dokumen = data?['investasi']?['dokumen'] ?? 'MoU_Lahan_Sumbermulyo.pdf';
+  Widget _buildInvestasiModalContent(BuildContext context) {
+    const status = 'Didanai';
+    const investor = 'PT. Agro Nusantara';
+    const nominal = 'Rp. 1.500.000.000';
+    const dokumen = 'MoU_Lahan_Sumbermulyo.pdf';
 
     return Container(
       width: 450, 
@@ -341,7 +345,7 @@ class DetilLahanView extends StatelessWidget {
     );
   }
 
-  void _showProgressModal(BuildContext context, Map<String, dynamic>? data) {
+  void _showProgressModal(BuildContext context) {
     showDialog(
       context: context,
       barrierColor: Colors.black.withOpacity(0.4), 
@@ -351,7 +355,7 @@ class DetilLahanView extends StatelessWidget {
           child: Dialog(
             backgroundColor: Colors.transparent, 
             elevation: 0,
-            child: ProgressTrackingModal(data: data),
+            child: const ProgressTrackingModal(),
           ),
         );
       },
@@ -375,7 +379,7 @@ class DetilLahanView extends StatelessWidget {
 }
 
 class _KomoditasCard extends StatefulWidget {
-  final List<dynamic>? komoditasData;
+  final List<Komoditas>? komoditasData;
 
   const _KomoditasCard({this.komoditasData});
 
@@ -389,9 +393,9 @@ class _KomoditasCardState extends State<_KomoditasCard> {
 
   @override
   Widget build(BuildContext context) {
-    final List<dynamic> activeList = (widget.komoditasData != null && widget.komoditasData!.isNotEmpty) 
-        ? widget.komoditasData! 
-        : [{'name': 'Data Kosong', 'percentage': '0%'}];
+    final List<Komoditas> activeList = (widget.komoditasData != null && widget.komoditasData!.isNotEmpty)
+        ? widget.komoditasData!
+        : [const Komoditas(nama: 'Data Kosong', persentase: '0%')];
 
     return Container(
       width: double.infinity,
@@ -422,12 +426,12 @@ class _KomoditasCardState extends State<_KomoditasCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
 
-                    Text(activeList[index]['name'], style: AppTextStyles.body ),
+                    Text(activeList[index].nama, style: AppTextStyles.body ),
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        activeList[index]['percentage'], 
+                        activeList[index].persentase, 
                         style: AppTextStyles.heading2Bold.copyWith(fontSize: 36, color: AppColors.darkgreen),
                       ),
                     ),
@@ -462,8 +466,7 @@ class _KomoditasCardState extends State<_KomoditasCard> {
 }
 
 class ProgressTrackingModal extends StatefulWidget {
-  final Map<String, dynamic>? data;
-  const ProgressTrackingModal({super.key, this.data});
+  const ProgressTrackingModal({super.key});
 
   @override
   State<ProgressTrackingModal> createState() => _ProgressTrackingModalState();
@@ -477,7 +480,7 @@ class _ProgressTrackingModalState extends State<ProgressTrackingModal> {
   void initState() {
     super.initState();
 
-    _blokList = widget.data?['daftar_blok'] ?? ['Blok A', 'Blok B'];
+    _blokList = ['Blok A', 'Blok B'];
   }
 
   @override
